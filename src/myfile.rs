@@ -1,4 +1,4 @@
-use std::fs::{DirEntry, read_dir};
+use std::fs::{read_dir, DirEntry};
 use std::io::{Error, ErrorKind, Result};
 use std::path::PathBuf;
 
@@ -10,7 +10,6 @@ pub struct MyFile {
 }
 
 impl MyFile {
-
     pub fn from(entry: &DirEntry) -> Result<MyFile> {
         let name = entry.file_name().to_string_lossy().into_owned();
         let in_dir = entry
@@ -28,7 +27,6 @@ impl MyFile {
         })
     }
 }
-
 
 pub fn walk(dir: &PathBuf, dirs: &mut Vec<PathBuf>, files: &mut Vec<MyFile>) -> Result<()> {
     // returns an io::Result for any issues that might come up during the walk
@@ -54,7 +52,8 @@ pub fn walk(dir: &PathBuf, dirs: &mut Vec<PathBuf>, files: &mut Vec<MyFile>) -> 
     Ok(())
 }
 
-fn is_match(file: &MyFile) -> () {}
+// TODO:
+// fn is_match(file: &MyFile) -> () {}
 
 pub fn flush(files: &mut Vec<MyFile>) {
     while !files.is_empty() {
