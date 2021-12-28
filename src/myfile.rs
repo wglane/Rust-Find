@@ -28,7 +28,7 @@ impl MyFile {
     }
 }
 
-pub fn walk(dir: &PathBuf, dirs: &mut Vec<PathBuf>, files: &mut Vec<MyFile>) -> Result<()> {
+pub fn walk(dir: &PathBuf, dirs: &mut Vec<PathBuf>, patterns: &Vec<String>, files: &mut Vec<MyFile>) -> Result<()> {
     // returns an io::Result for any issues that might come up during the walk
     // suggested here: [Stack Overflow](https://stackoverflow.com/a/49785300/4577129)
     let entries = read_dir(dir)?;
@@ -46,14 +46,21 @@ pub fn walk(dir: &PathBuf, dirs: &mut Vec<PathBuf>, files: &mut Vec<MyFile>) -> 
                 );
                 flush(files);
             }
-            files.push(file);
+            for pattern in patterns {
+                if is_match(pattern, &file) {
+                    files.push(file);
+                    break;
+                }
+            }
         }
     }
     Ok(())
 }
 
-// TODO:
-// fn is_match(file: &MyFile) -> () {}
+fn is_match(pattern: &String, file: &MyFile) -> bool {
+    // TODO:
+    true
+}
 
 pub fn flush(files: &mut Vec<MyFile>) {
     while !files.is_empty() {

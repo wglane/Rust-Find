@@ -28,8 +28,8 @@ fn main() {
     let mut files: Vec<myfile::MyFile> = Vec::with_capacity(BUFSIZE);
 
     while !dirs.is_empty() {
-        let dir = dirs.pop().unwrap(); // safe
-        if let Err(e) = myfile::walk(&dir, &mut dirs, &mut files) {
+        let dir = dirs.pop().unwrap(); // safe (always non-empty)
+        if let Err(e) = myfile::walk(&dir, &mut dirs, &opt.patterns, &mut files) {
             println!("{}", e);
         }
     }
