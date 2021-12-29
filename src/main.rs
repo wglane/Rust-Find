@@ -4,9 +4,6 @@ use myfile::Regex;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-// const DIRS: [&str; 1] = ["./src"];
-// const PATTERNS: [&str; 1] = ["*.rs"];
-
 const BUFSIZE: usize = 1000;
 
 #[derive(Debug, StructOpt)]
@@ -21,7 +18,7 @@ pub struct Opt {
     #[structopt(short = "s", long = "size", help = "match files above size <size> bytes")]
     size: Option<usize>,
 
-    #[structopt(short = "o", long = "output", help = "write results to file <output> intead of STDOUT")]
+    #[structopt(short = "o", long = "output", help = "write (or append) results to file <output> intead of STDOUT")]
     output: Option<String>,
 }
 

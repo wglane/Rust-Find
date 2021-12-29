@@ -51,6 +51,8 @@ pub fn walk(dir: &PathBuf, dirs: &mut Vec<PathBuf>, patterns: &Vec<Regex>, files
                 flush(files, &options.output)?;
             }
             for pattern in patterns {
+                // TODO: create own matching function that incorporates all options, not just
+                // regex
                 if pattern.is_match(&file.name) {
                     files.push(file);
                     break;
