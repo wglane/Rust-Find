@@ -2,6 +2,8 @@ use std::fs::{read_dir, DirEntry};
 use std::io::{Error, ErrorKind, Result};
 use std::path::PathBuf;
 
+pub use regex::Regex;
+
 #[derive(Debug)]
 pub struct MyFile {
     pub name: String,
@@ -28,7 +30,7 @@ impl MyFile {
     }
 }
 
-pub fn walk(dir: &PathBuf, dirs: &mut Vec<PathBuf>, patterns: &Vec<String>, files: &mut Vec<MyFile>) -> Result<()> {
+pub fn walk(dir: &PathBuf, dirs: &mut Vec<PathBuf>, patterns: &Vec<Regex>, files: &mut Vec<MyFile>) -> Result<()> {
     // returns an io::Result for any issues that might come up during the walk
     // suggested here: [Stack Overflow](https://stackoverflow.com/a/49785300/4577129)
     let entries = read_dir(dir)?;
@@ -47,7 +49,7 @@ pub fn walk(dir: &PathBuf, dirs: &mut Vec<PathBuf>, patterns: &Vec<String>, file
                 flush(files);
             }
             for pattern in patterns {
-                if is_match(pattern, &file) {
+                if pattern.is_match(&file.name) {
                     files.push(file);
                     break;
                 }
@@ -55,11 +57,6 @@ pub fn walk(dir: &PathBuf, dirs: &mut Vec<PathBuf>, patterns: &Vec<String>, file
         }
     }
     Ok(())
-}
-
-fn is_match(pattern: &String, file: &MyFile) -> bool {
-    // TODO:
-    true
 }
 
 pub fn flush(files: &mut Vec<MyFile>) {

@@ -1,4 +1,5 @@
 mod myfile;
+use myfile::Regex;
 
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -19,6 +20,21 @@ struct Opt {
 
     #[structopt(short = "s", long = "size", help = "match files above size <size> bytes")]
     size: Option<usize>,
+
+    // #[structopt(short = "o", long = "output", help = "write results to file <output> intead of STDOUT")]
+}
+
+fn parse_all_with_warn(patterns: &Vec<String>) -> Vec<Regex> {
+    let mut parsed: Vec<Regex> = vec![];
+    for pattern in patterns {
+        let re = Regex::new(pattern);
+        if re.is_err() {
+            println!("{}", re.unwrap_err());
+            continue;
+        }
+        parsed.push(re.unwrap()); 
+    }
+    parsed
 }
 
 fn main() {
@@ -26,10 +42,15 @@ fn main() {
     let opt: Opt = StructOpt::from_args();
     let mut dirs = opt.dirs.clone();
     let mut files: Vec<myfile::MyFile> = Vec::with_capacity(BUFSIZE);
+    let patterns = parse_all_with_warn(&opt.patterns);
+    if patterns.is_empty() {
+        println!("Input contained no valid patterns. Exiting.");
+        return
+    }
 
     while !dirs.is_empty() {
         let dir = dirs.pop().unwrap(); // safe (always non-empty)
-        if let Err(e) = myfile::walk(&dir, &mut dirs, &opt.patterns, &mut files) {
+        if let Err(e) = myfile::walk(&dir, &mut dirs, &patterns, &mut files) {
             println!("{}", e);
         }
     }
