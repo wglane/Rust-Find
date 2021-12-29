@@ -1,6 +1,8 @@
-use std::fs::{read_dir, DirEntry};
-use std::io::{Error, ErrorKind, Result};
+use std::fs::{read_dir, DirEntry, OpenOptions};
+use std::io::{Error, ErrorKind, Result, Write, BufWriter};
 use std::path::PathBuf;
+
+use crate::Opt;
 
 pub use regex::Regex;
 
@@ -30,7 +32,7 @@ impl MyFile {
     }
 }
 
-pub fn walk(dir: &PathBuf, dirs: &mut Vec<PathBuf>, patterns: &Vec<Regex>, files: &mut Vec<MyFile>) -> Result<()> {
+pub fn walk(dir: &PathBuf, dirs: &mut Vec<PathBuf>, patterns: &Vec<Regex>, files: &mut Vec<MyFile>, options: &Opt) -> Result<()> {
     // returns an io::Result for any issues that might come up during the walk
     // suggested here: [Stack Overflow](https://stackoverflow.com/a/49785300/4577129)
     let entries = read_dir(dir)?;
@@ -46,7 +48,7 @@ pub fn walk(dir: &PathBuf, dirs: &mut Vec<PathBuf>, patterns: &Vec<Regex>, files
                     "File buffer capacity ({}) exceeded! Flushing to STDOUT...",
                     files.capacity()
                 );
-                flush(files);
+                flush(files, &options.output)?;
             }
             for pattern in patterns {
                 if pattern.is_match(&file.name) {
@@ -59,8 +61,19 @@ pub fn walk(dir: &PathBuf, dirs: &mut Vec<PathBuf>, patterns: &Vec<Regex>, files
     Ok(())
 }
 
-pub fn flush(files: &mut Vec<MyFile>) {
-    while !files.is_empty() {
-        println!("{:?}", files.pop().unwrap());
+pub fn flush(files: &mut Vec<MyFile>, output: &Option<String>) -> Result<()> {
+    if let Some(outfile) = output {
+        let f = OpenOptions::new().create(true).append(true).open(outfile)?;
+        let mut f = BufWriter::new(f);
+        while !files.is_empty() {
+            let file = files.pop().unwrap();
+            write![f, "{}\n", file.name]?;
+        }
     }
+    else {
+        while !files.is_empty() {
+            println!("{:?}", files.pop().unwrap());
+        }
+    }
+    Ok(())
 }
