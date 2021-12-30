@@ -11,6 +11,7 @@ pub struct MyFile {
     pub name: String,
     in_dir: PathBuf,
     size_bytes: u64,
+    // depth: usize, // TODO:
 }
 
 impl MyFile {
@@ -44,23 +45,31 @@ pub fn walk(dir: &PathBuf, dirs: &mut Vec<PathBuf>, patterns: &Vec<Regex>, files
         } else if md.is_file() {
             let file = MyFile::from(&entry)?;
             if files.len() >= files.capacity() {
-                println!(
-                    "File buffer capacity ({}) exceeded! Flushing to STDOUT...",
-                    files.capacity()
-                );
+                dbg!("File buffer capacity ({}) exceeded! Flushing to STDOUT...", files.capacity());
                 flush(files, &options.output)?;
             }
-            for pattern in patterns {
-                // TODO: create own matching function that incorporates all options, not just
-                // regex
-                if pattern.is_match(&file.name) {
-                    files.push(file);
-                    break;
-                }
+            if is_match(&file, &patterns, &options) {
+                files.push(file);
             }
         }
     }
+    // flush remaining
+    flush(files, &options.output)?;
     Ok(())
+}
+
+fn is_match(file: &MyFile, patterns: &Vec<Regex>, options: &Opt) -> bool {
+    if let Some(min_size) = options.size {
+        if file.size_bytes < min_size {
+            return false
+        }
+    }
+    for pattern in patterns {
+        if !pattern.is_match(&file.name) {
+            return false
+        }
+    }
+    true
 }
 
 pub fn flush(files: &mut Vec<MyFile>, output: &Option<String>) -> Result<()> {

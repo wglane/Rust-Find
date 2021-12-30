@@ -14,12 +14,16 @@ pub struct Opt {
 
     #[structopt(short = "p", long = "patterns", parse(from_str = parse_regex_with_warn), help = "list of patterns to use")]
     patterns: Vec<Option<Regex>>,
-
-    #[structopt(short = "s", long = "size", help = "match files above size <size> bytes")]
-    size: Option<usize>,
-
+    
     #[structopt(short = "o", long = "output", help = "write (or append) results to file <output> intead of STDOUT")]
     output: Option<String>,
+
+    #[structopt(short = "s", long = "size", help = "match files above size <size> bytes")]
+    size: Option<u64>,
+
+    #[structopt(short = "r", long = "depth", help = "match files with recusion depth at most <depth> ")]
+    depth: Option<usize>
+
 }
 
 fn parse_regex_with_warn(pattern: &str) -> Option<Regex> {
@@ -38,20 +42,16 @@ fn main() {
     let valid_patterns: Vec<Regex> = opt.patterns.iter().filter_map(|p| p.clone()).collect();
     if valid_patterns.is_empty() {
         println!("Input contained no valid patterns. Exiting.");
-        return
+        std::process::exit(1);
     }
 
     let mut dirs = opt.dirs.clone();
     let mut files: Vec<myfile::MyFile> = Vec::with_capacity(BUFSIZE);
     while !dirs.is_empty() {
+        // todo: make custom struct for dir which contains depth
         let dir = dirs.pop().unwrap(); // safe (always non-empty)
         if let Err(e) = myfile::walk(&dir, &mut dirs, &valid_patterns, &mut files, &opt) {
             println!("{}", e);
         }
     }
-
-    // flush remaining
-    if let Err(e) = myfile::flush(&mut files, &opt.output) {
-        println!("{}", e);
-    };
 }
