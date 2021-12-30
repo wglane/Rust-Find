@@ -43,6 +43,7 @@ pub struct Opt {
     depth: Option<usize>,
 }
 
+#[derive(Debug)]
 pub struct DirLevel {
     path: PathBuf,
     level: usize,
@@ -85,7 +86,8 @@ fn main() {
             if dir.level > max_level {
                 continue;
             }
-        } else if let Err(e) = myfile::walk(&dir, &mut dirs, &valid_patterns, &mut files, &opt) {
+        }
+        if let Err(e) = myfile::walk(&dir, &mut dirs, &valid_patterns, &mut files, &opt) {
             println!("{}", e);
         }
     }
