@@ -55,3 +55,11 @@ fn main() {
         }
     }
 }
+
+#[test]
+fn test_parse_regex_with_warn() {
+    let good = r".*\.rs";
+    let bad = r"*\.rs";
+    assert!(parse_regex_with_warn(good).is_some());
+    assert!(parse_regex_with_warn(bad).is_none());
+}

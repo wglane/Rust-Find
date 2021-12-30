@@ -65,11 +65,11 @@ fn is_match(file: &MyFile, patterns: &Vec<Regex>, options: &Opt) -> bool {
         }
     }
     for pattern in patterns {
-        if !pattern.is_match(&file.name) {
-            return false
+        if pattern.is_match(&file.name) {
+            return true
         }
     }
-    true
+    false
 }
 
 pub fn flush(files: &mut Vec<MyFile>, output: &Option<String>) -> Result<()> {
@@ -87,4 +87,9 @@ pub fn flush(files: &mut Vec<MyFile>, output: &Option<String>) -> Result<()> {
         }
     }
     Ok(())
+}
+
+#[test]
+fn test_is_match() {
+    // TODO:
 }
